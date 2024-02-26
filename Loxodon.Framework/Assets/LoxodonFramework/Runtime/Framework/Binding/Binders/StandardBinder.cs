@@ -3,25 +3,26 @@
  *
  * Copyright (c) 2018 Clark Yang
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of 
- * this software and associated documentation files (the "Software"), to deal in 
- * the Software without restriction, including without limitation the rights to 
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
- * of the Software, and to permit persons to whom the Software is furnished to do so, 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do so,
  * subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all 
+ * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
 
+using System;
 using Loxodon.Framework.Binding.Contexts;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,11 +31,11 @@ namespace Loxodon.Framework.Binding.Binders
 {
     public class StandardBinder : IBinder
     {
-        protected IBindingFactory factory;
+        IBindingFactory factory;
 
-        public StandardBinder(IBindingFactory factory)
+        public StandardBinder(IBindingFactory _factory)
         {
-            this.factory = factory;
+            factory = _factory;
         }
 
         public IBinding Bind(IBindingContext bindingContext, object source, object target, BindingDescription bindingDescription)
@@ -45,9 +46,9 @@ namespace Loxodon.Framework.Binding.Binders
         public IEnumerable<IBinding> Bind(IBindingContext bindingContext, object source, object target, IEnumerable<BindingDescription> bindingDescriptions)
         {
             if (bindingDescriptions == null)
-                return new IBinding[0];
+                return Array.Empty<IBinding>();
 
-            return bindingDescriptions.Select(description => this.Bind(bindingContext, source, target, description));
+            return bindingDescriptions.Select(description => Bind(bindingContext, source, target, description));
         }
     }
 }

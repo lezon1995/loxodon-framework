@@ -158,7 +158,7 @@ namespace Loxodon.Framework.Tutorials
             this.SetDataContext(viewModel);
 
             /* databinding */
-            BindingSet<InterationExample, InterationViewModel> bindingSet = this.CreateBindingSet<InterationExample, InterationViewModel>();
+            BindingSet<InterationExample, InterationViewModel> bindingSet = this.CreateBindingSet(viewModel);
 
             /* Bind the method "OnOpenAlert" to an interactive request */
             bindingSet.Bind().For(v => v.OnOpenAlert).To(vm => vm.AlertDialogRequest);

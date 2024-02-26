@@ -3,22 +3,22 @@
  *
  * Copyright (c) 2018 Clark Yang
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of 
- * this software and associated documentation files (the "Software"), to deal in 
- * the Software without restriction, including without limitation the rights to 
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
- * of the Software, and to permit persons to whom the Software is furnished to do so, 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do so,
  * subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all 
+ * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
 
@@ -39,14 +39,14 @@ namespace Loxodon.Log
 
         public Level Level
         {
-            get { return this._level; }
-            set { this._level = value; }
+            get { return _level; }
+            set { _level = value; }
         }
 
         public bool InUnity
         {
-            get { return this.inUnity; }
-            set { this.inUnity = value; }
+            get { return inUnity; }
+            set { inUnity = value; }
         }
 
         public ILog GetLogger<T>()
@@ -56,9 +56,10 @@ namespace Loxodon.Log
 
         public ILog GetLogger(Type type)
         {
-            ILog log;
-            if (repositories.TryGetValue(type.FullName, out log))
+            if (repositories.TryGetValue(type.FullName, out var log))
+            {
                 return log;
+            }
 
             log = new LogImpl(type.Name, this);
             repositories[type.FullName] = log;
@@ -67,9 +68,10 @@ namespace Loxodon.Log
 
         public ILog GetLogger(string name)
         {
-            ILog log;
-            if (repositories.TryGetValue(name, out log))
+            if (repositories.TryGetValue(name, out var log))
+            {
                 return log;
+            }
 
             log = new LogImpl(name, this);
             repositories[name] = log;
@@ -79,24 +81,28 @@ namespace Loxodon.Log
 
     internal class LogImpl : ILog
     {
-        private string name;
-        private DefaultLogFactory _factory;
+        string _name;
+        DefaultLogFactory _factory;
+
         public LogImpl(string name, DefaultLogFactory factory)
         {
-            this.name = name;
-            this._factory = factory;
+            _name = name;
+            _factory = factory;
         }
 
-        public string Name { get { return this.name; } }
+        public string Name
+        {
+            get { return _name; }
+        }
 
         protected virtual string Format(object message, string level)
         {
-            return string.Format("{0:yyyy-MM-dd HH:mm:ss.fff} [{1}] {2} - {3}", System.DateTime.Now, level, name, message);
+            return string.Format("{0:yyyy-MM-dd HH:mm:ss.fff} [{1}] {2} - {3}", DateTime.Now, level, _name, message);
         }
 
         public virtual void Debug(object message)
         {
-            if (this._factory.InUnity)
+            if (_factory.InUnity)
                 UnityEngine.Debug.Log(Format(message, "DEBUG"));
 #if !NETFX_CORE
             else
@@ -116,7 +122,7 @@ namespace Loxodon.Log
 
         public virtual void Info(object message)
         {
-            if (this._factory.InUnity)
+            if (_factory.InUnity)
                 UnityEngine.Debug.Log(Format(message, "INFO"));
 #if !NETFX_CORE
             else
@@ -136,7 +142,7 @@ namespace Loxodon.Log
 
         public virtual void Warn(object message)
         {
-            if (this._factory.InUnity)
+            if (_factory.InUnity)
                 UnityEngine.Debug.LogWarning(Format(message, "WARN"));
 #if !NETFX_CORE
             else
@@ -156,7 +162,7 @@ namespace Loxodon.Log
 
         public virtual void Error(object message)
         {
-            if (this._factory.InUnity)
+            if (_factory.InUnity)
                 UnityEngine.Debug.LogError(Format(message, "ERROR"));
 #if !NETFX_CORE
             else
@@ -176,7 +182,7 @@ namespace Loxodon.Log
 
         public virtual void Fatal(object message)
         {
-            if (this._factory.InUnity)
+            if (_factory.InUnity)
                 UnityEngine.Debug.LogError(Format(message, "FATAL"));
 #if !NETFX_CORE
             else
@@ -196,7 +202,7 @@ namespace Loxodon.Log
 
         protected bool IsEnabled(Level level)
         {
-            return level >= this._factory.Level;
+            return level >= _factory.Level;
         }
 
         public virtual bool IsDebugEnabled

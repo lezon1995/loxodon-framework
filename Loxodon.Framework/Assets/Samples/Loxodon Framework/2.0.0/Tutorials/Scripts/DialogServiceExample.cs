@@ -128,7 +128,7 @@ namespace Loxodon.Framework.Tutorials
             this.SetDataContext(viewModel);
 
             /* databinding */
-            BindingSet<DialogServiceExample, DialogServiceExampleViewModel> bindingSet = this.CreateBindingSet<DialogServiceExample, DialogServiceExampleViewModel>();
+            BindingSet<DialogServiceExample, DialogServiceExampleViewModel> bindingSet = this.CreateBindingSet(viewModel);
 
             /* Binding command */
             bindingSet.Bind(this.openAlert).For(v => v.onClick).To(vm => vm.OpenAlertDialog);

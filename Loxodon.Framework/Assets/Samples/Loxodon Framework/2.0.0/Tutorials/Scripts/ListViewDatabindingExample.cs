@@ -76,10 +76,8 @@ namespace Loxodon.Framework.Tutorials
         {
             editViewInteractionAction = new AsyncViewInteractionAction(editView);
             viewModel = new ListViewViewModel();
-            IBindingContext bindingContext = this.BindingContext();
-            bindingContext.DataContext = viewModel;
 
-            BindingSet<ListViewDatabindingExample, ListViewViewModel> bindingSet = this.CreateBindingSet<ListViewDatabindingExample, ListViewViewModel>();
+            BindingSet<ListViewDatabindingExample, ListViewViewModel> bindingSet = this.CreateBindingSet(viewModel);
             bindingSet.Bind(this.listView).For(v => v.Items).To(vm => vm.Items).OneWay();
             bindingSet.Bind(this.detailView).For(v => v.Item).To(vm => vm.SelectedItem);
             bindingSet.Bind().For(v => v.editViewInteractionAction).To(vm => vm.ItemEditRequest);

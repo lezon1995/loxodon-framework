@@ -101,11 +101,8 @@ namespace Loxodon.Framework.Tutorials
         {
             ButtonGroupViewModel viewModel = new ButtonGroupViewModel();
 
-            IBindingContext bindingContext = this.BindingContext();
-            bindingContext.DataContext = viewModel;
-
             /* databinding */
-            BindingSet<DatabindingForButtonGroupExample, ButtonGroupViewModel> bindingSet = this.CreateBindingSet<DatabindingForButtonGroupExample, ButtonGroupViewModel>();
+            BindingSet<DatabindingForButtonGroupExample, ButtonGroupViewModel> bindingSet = this.CreateBindingSet(viewModel);
             bindingSet.Bind(this.button1).For(v => v.onClick).To(vm => vm.Click).CommandParameter(() => button1.name);
             bindingSet.Bind(this.button2).For(v => v.onClick).To(vm => vm.Click).CommandParameter(() => button2.name);
             bindingSet.Bind(this.button3).For(v => v.onClick).To(vm => vm.Click).CommandParameter(() => button3.name);

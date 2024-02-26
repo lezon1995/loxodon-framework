@@ -115,7 +115,7 @@ namespace Loxodon.Framework.Tutorials
             bindingContext.DataContext = viewModel;
 
             /* databinding */
-            BindingSet<VariableExample, VariableViewModel> bindingSet = this.CreateBindingSet<VariableExample, VariableViewModel>();
+            BindingSet<VariableExample, VariableViewModel> bindingSet = this.CreateBindingSet(viewModel);
             bindingSet.Bind(this.variables.Get<InputField>("username")).For(v => v.text, v => v.onEndEdit).To(vm => vm.Username).TwoWay();
             bindingSet.Bind(this.variables.Get<InputField>("email")).For(v => v.text, v => v.onEndEdit).To(vm => vm.Email).TwoWay();
             bindingSet.Bind(this.variables.Get<Toggle>("remember")).For(v => v.isOn, v => v.onValueChanged).To(vm => vm.Remember).TwoWay();

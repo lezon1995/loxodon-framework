@@ -3,22 +3,22 @@
  *
  * Copyright (c) 2018 Clark Yang
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of 
- * this software and associated documentation files (the "Software"), to deal in 
- * the Software without restriction, including without limitation the rights to 
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
- * of the Software, and to permit persons to whom the Software is furnished to do so, 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do so,
  * subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all 
+ * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
 
@@ -35,6 +35,7 @@ namespace Loxodon.Framework.Binding
     public static class BehaviourBindingExtension
     {
         private static IBinder binder;
+
         public static IBinder Binder
         {
             get
@@ -51,75 +52,79 @@ namespace Loxodon.Framework.Binding
 
         public static IBindingContext BindingContext(this Behaviour behaviour)
         {
+            return GetContext(behaviour);
+        }
+
+        static IBindingContext GetContext(Behaviour behaviour)
+        {
             if (behaviour == null || behaviour.gameObject == null)
                 return null;
 
-            BindingContextLifecycle bindingContextLifecycle = behaviour.GetComponent<BindingContextLifecycle>();
-            if (bindingContextLifecycle == null)
-                bindingContextLifecycle = behaviour.gameObject.AddComponent<BindingContextLifecycle>();
-
-            IBindingContext bindingContext = bindingContextLifecycle.BindingContext;
-            if (bindingContext == null)
+            if (!behaviour.TryGetComponent<BindingContextLifecycle>(out var ctxLifecycle))
             {
-                bindingContext = new BindingContext(behaviour, Binder);
-                bindingContextLifecycle.BindingContext = bindingContext;
+                ctxLifecycle = behaviour.gameObject.AddComponent<BindingContextLifecycle>();
             }
-            return bindingContext;
+
+            IBindingContext context = ctxLifecycle.BindingContext;
+            if (context == null)
+            {
+                context = new BindingContext(behaviour, Binder);
+                ctxLifecycle.BindingContext = context;
+            }
+
+            return context;
         }
 
-        public static BindingSet<TBehaviour, TSource> CreateBindingSet<TBehaviour, TSource>(this TBehaviour behaviour) where TBehaviour : Behaviour
+        public static BindingSet<V, VM> CreateBindingSet<V, VM>(this V behaviour) where V : Behaviour
         {
-            IBindingContext context = behaviour.BindingContext();
-            return new BindingSet<TBehaviour, TSource>(context, behaviour);
+            return new BindingSet<V, VM>(GetContext(behaviour), behaviour);
         }
 
-        public static BindingSet<TBehaviour, TSource> CreateBindingSet<TBehaviour, TSource>(this TBehaviour behaviour, TSource dataContext) where TBehaviour : Behaviour
+        public static BindingSet<V, VM> CreateBindingSet<V, VM>(this V behaviour, VM dataContext) where V : Behaviour
         {
-            IBindingContext context = behaviour.BindingContext();
+            var context = GetContext(behaviour);
             context.DataContext = dataContext;
-            return new BindingSet<TBehaviour, TSource>(context, behaviour);
+            return new BindingSet<V, VM>(context, behaviour);
         }
 
-        public static BindingSet<TBehaviour> CreateBindingSet<TBehaviour>(this TBehaviour behaviour) where TBehaviour : Behaviour
+        public static BindingSet<V> CreateBindingSet<V>(this V behaviour) where V : Behaviour
         {
-            IBindingContext context = behaviour.BindingContext();
-            return new BindingSet<TBehaviour>(context, behaviour);
+            return new BindingSet<V>(GetContext(behaviour), behaviour);
         }
 
         public static BindingSet CreateSimpleBindingSet(this Behaviour behaviour)
         {
-            IBindingContext context = behaviour.BindingContext();
-            return new BindingSet(context, behaviour);
+            return new BindingSet(GetContext(behaviour), behaviour);
         }
 
         public static void SetDataContext(this Behaviour behaviour, object dataContext)
         {
-            behaviour.BindingContext().DataContext = dataContext;
+            GetContext(behaviour).DataContext = dataContext;
         }
 
         public static object GetDataContext(this Behaviour behaviour)
         {
-            return behaviour.BindingContext().DataContext;
+            return GetContext(behaviour).DataContext;
         }
 
         public static void AddBinding(this Behaviour behaviour, BindingDescription bindingDescription)
         {
-            behaviour.BindingContext().Add(behaviour, bindingDescription);
+            GetContext(behaviour).Add(behaviour, bindingDescription);
         }
 
         public static void AddBindings(this Behaviour behaviour, IEnumerable<BindingDescription> bindingDescriptions)
         {
-            behaviour.BindingContext().Add(behaviour, bindingDescriptions);
+            GetContext(behaviour).Add(behaviour, bindingDescriptions);
         }
 
         public static void AddBinding(this Behaviour behaviour, IBinding binding)
         {
-            behaviour.BindingContext().Add(binding);
+            GetContext(behaviour).Add(binding);
         }
 
         public static void AddBinding(this Behaviour behaviour, IBinding binding, object key = null)
         {
-            behaviour.BindingContext().Add(binding, key);
+            GetContext(behaviour).Add(binding, key);
         }
 
         public static void AddBindings(this Behaviour behaviour, IEnumerable<IBinding> bindings, object key = null)
@@ -127,17 +132,17 @@ namespace Loxodon.Framework.Binding
             if (bindings == null)
                 return;
 
-            behaviour.BindingContext().Add(bindings, key);
+            GetContext(behaviour).Add(bindings, key);
         }
 
         public static void AddBinding(this Behaviour behaviour, object target, BindingDescription bindingDescription, object key = null)
         {
-            behaviour.BindingContext().Add(target, bindingDescription, key);
+            GetContext(behaviour).Add(target, bindingDescription, key);
         }
 
         public static void AddBindings(this Behaviour behaviour, object target, IEnumerable<BindingDescription> bindingDescriptions, object key = null)
         {
-            behaviour.BindingContext().Add(target, bindingDescriptions, key);
+            GetContext(behaviour).Add(target, bindingDescriptions, key);
         }
 
         public static void AddBindings(this Behaviour behaviour, IDictionary<object, IEnumerable<BindingDescription>> bindingMap, object key = null)
@@ -145,21 +150,21 @@ namespace Loxodon.Framework.Binding
             if (bindingMap == null)
                 return;
 
-            IBindingContext context = behaviour.BindingContext();
-            foreach (var kvp in bindingMap)
+            IBindingContext context = GetContext(behaviour);
+            foreach (var (o, bindingDescriptions) in bindingMap)
             {
-                context.Add(kvp.Key, kvp.Value, key);
+                context.Add(o, bindingDescriptions, key);
             }
         }
 
         public static void ClearBindings(this Behaviour behaviour, object key)
         {
-            behaviour.BindingContext().Clear(key);
+            GetContext(behaviour).Clear(key);
         }
 
         public static void ClearAllBindings(this Behaviour behaviour)
         {
-            behaviour.BindingContext().Clear();
+            GetContext(behaviour).Clear();
         }
     }
 }

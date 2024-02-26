@@ -3,380 +3,379 @@
  *
  * Copyright (c) 2018 Clark Yang
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of 
- * this software and associated documentation files (the "Software"), to deal in 
- * the Software without restriction, including without limitation the rights to 
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
- * of the Software, and to permit persons to whom the Software is furnished to do so, 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do so,
  * subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all 
+ * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
 
 using System;
 using System.Linq.Expressions;
-
-using Loxodon.Log;
 using Loxodon.Framework.Binding.Contexts;
 using Loxodon.Framework.Binding.Converters;
 using Loxodon.Framework.Interactivity;
+using Loxodon.Log;
 #if UNITY_2019_1_OR_NEWER
 using UnityEngine.UIElements;
 #endif
 
 namespace Loxodon.Framework.Binding.Builder
 {
-    public class BindingBuilder<TTarget, TSource> : BindingBuilderBase where TTarget : class
+    public class BindingBuilder<T, VM> : BindingBuilderBase where T : class
     {
-        //private static readonly ILog log = LogManager.GetLogger(typeof(BindingBuilder<TTarget, TSource>));
+        static readonly ILog log = LogManager.GetLogger(typeof(BindingBuilder<T, VM>));
 
-        public BindingBuilder(IBindingContext context, TTarget target) : base(context, target)
+        public BindingBuilder(IBindingContext context, T target) : base(context, target)
         {
-            this.description.TargetType = typeof(TTarget);
+            description.TargetType = typeof(T);
         }
 
-        public BindingBuilder<TTarget, TSource> For(string targetName)
+        public BindingBuilder<T, VM> For(string targetName)
         {
-            this.description.TargetName = targetName;
-            this.description.UpdateTrigger = null;
+            description.TargetName = targetName;
+            description.UpdateTrigger = null;
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> For(string targetName, string updateTrigger)
+        public BindingBuilder<T, VM> For(string targetName, string updateTrigger)
         {
-            this.description.TargetName = targetName;
-            this.description.UpdateTrigger = updateTrigger;
+            description.TargetName = targetName;
+            description.UpdateTrigger = updateTrigger;
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> For<TResult>(Expression<Func<TTarget, TResult>> memberExpression)
+        public BindingBuilder<T, VM> For<R>(Expression<Func<T, R>> memberExpression)
         {
-            string targetName = this.PathParser.ParseMemberName(memberExpression);
-            this.description.TargetName = targetName;
-            this.description.UpdateTrigger = null;
+            string targetName = PathParser.ParseMemberName(memberExpression);
+            description.TargetName = targetName;
+            description.UpdateTrigger = null;
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> For<TResult>(Expression<Func<TTarget, TResult>> memberExpression, string updateTrigger)
+        public BindingBuilder<T, VM> For<R>(Expression<Func<T, R>> memberExpression, string updateTrigger)
         {
-            string targetName = this.PathParser.ParseMemberName(memberExpression);
-            this.description.TargetName = targetName;
-            this.description.UpdateTrigger = updateTrigger;
+            string targetName = PathParser.ParseMemberName(memberExpression);
+            description.TargetName = targetName;
+            description.UpdateTrigger = updateTrigger;
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> For<TResult, TEvent>(Expression<Func<TTarget, TResult>> memberExpression, Expression<Func<TTarget, TEvent>> updateTriggerExpression)
+        public BindingBuilder<T, VM> For<R, TEvent>(Expression<Func<T, R>> memberExpression, Expression<Func<T, TEvent>> updateTriggerExpression)
         {
-            string targetName = this.PathParser.ParseMemberName(memberExpression);
-            string updateTrigger = this.PathParser.ParseMemberName(updateTriggerExpression);
-            this.description.TargetName = targetName;
-            this.description.UpdateTrigger = updateTrigger;
+            string targetName = PathParser.ParseMemberName(memberExpression);
+            string updateTrigger = PathParser.ParseMemberName(updateTriggerExpression);
+            description.TargetName = targetName;
+            description.UpdateTrigger = updateTrigger;
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> For(Expression<Func<TTarget, EventHandler<InteractionEventArgs>>> memberExpression)
+        public BindingBuilder<T, VM> For(Expression<Func<T, EventHandler<InteractionEventArgs>>> memberExpression)
         {
-            string targetName = this.PathParser.ParseMemberName(memberExpression);
-            this.description.TargetName = targetName;
-            this.description.UpdateTrigger = null;
-            this.OneWayToSource();
+            string targetName = PathParser.ParseMemberName(memberExpression);
+            description.TargetName = targetName;
+            description.UpdateTrigger = null;
+            OneWayToSource();
             return this;
         }
 
 #if UNITY_2019_1_OR_NEWER
-        public BindingBuilder<TTarget, TSource> For<TResult>(Expression<Func<TTarget, TResult>> memberExpression, Expression<Func<TTarget, Func<EventCallback<ChangeEvent<TResult>>, bool>>> updateTriggerExpression)
+        public BindingBuilder<T, VM> For<R>(Expression<Func<T, R>> memberExpression, Expression<Func<T, Func<EventCallback<ChangeEvent<R>>, bool>>> updateTriggerExpression)
         {
-            string targetName = this.PathParser.ParseMemberName(memberExpression);
-            string updateTrigger = this.PathParser.ParseMemberName(updateTriggerExpression);
-            this.description.TargetName = targetName;
-            this.description.UpdateTrigger = updateTrigger;
+            string targetName = PathParser.ParseMemberName(memberExpression);
+            string updateTrigger = PathParser.ParseMemberName(updateTriggerExpression);
+            description.TargetName = targetName;
+            description.UpdateTrigger = updateTrigger;
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> For<TResult>(Expression<Func<TTarget, Func<EventCallback<ChangeEvent<TResult>>, bool>>> memberExpression)
+        public BindingBuilder<T, VM> For<R>(Expression<Func<T, Func<EventCallback<ChangeEvent<R>>, bool>>> memberExpression)
         {
-            string targetName = this.PathParser.ParseMemberName(memberExpression);
-            this.description.TargetName = targetName;
-            this.description.UpdateTrigger = null;
-            this.OneWayToSource();
+            string targetName = PathParser.ParseMemberName(memberExpression);
+            description.TargetName = targetName;
+            description.UpdateTrigger = null;
+            OneWayToSource();
             return this;
         }
 #endif
 
-        public BindingBuilder<TTarget, TSource> To(string path)
+        public BindingBuilder<T, VM> To(string path)
         {
-            this.SetMemberPath(path);
+            SetMemberPath(path);
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> To<TResult>(Expression<Func<TSource, TResult>> path)
+        public BindingBuilder<T, VM> To<R>(Expression<Func<VM, R>> path)
         {
-            this.SetMemberPath(this.PathParser.Parse(path));
+            SetMemberPath(PathParser.Parse(path));
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> To<TParameter>(Expression<Func<TSource, Action<TParameter>>> path)
+        public BindingBuilder<T, VM> To<TParameter>(Expression<Func<VM, Action<TParameter>>> path)
         {
-            this.SetMemberPath(this.PathParser.Parse(path));
+            SetMemberPath(PathParser.Parse(path));
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> To(Expression<Func<TSource, Action>> path)
+        public BindingBuilder<T, VM> To(Expression<Func<VM, Action>> path)
         {
-            this.SetMemberPath(this.PathParser.Parse(path));
+            SetMemberPath(PathParser.Parse(path));
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> ToExpression<TResult>(Expression<Func<TSource, TResult>> expression)
+        public BindingBuilder<T, VM> ToExpression<R>(Expression<Func<VM, R>> expression)
         {
-            this.SetExpression(expression);
-            this.OneWay();
+            SetExpression(expression);
+            OneWay();
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> TwoWay()
+        public BindingBuilder<T, VM> TwoWay()
         {
-            this.SetMode(BindingMode.TwoWay);
+            SetMode(BindingMode.TwoWay);
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> OneWay()
+        public BindingBuilder<T, VM> OneWay()
         {
-            this.SetMode(BindingMode.OneWay);
+            SetMode(BindingMode.OneWay);
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> OneWayToSource()
+        public BindingBuilder<T, VM> OneWayToSource()
         {
-            this.SetMode(BindingMode.OneWayToSource);
+            SetMode(BindingMode.OneWayToSource);
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> OneTime()
+        public BindingBuilder<T, VM> OneTime()
         {
-            this.SetMode(BindingMode.OneTime);
+            SetMode(BindingMode.OneTime);
             return this;
         }
 
-        //public BindingBuilder<TTarget, TSource> CommandParameter(object parameter)
+        //public BindingBuilder<T, VM> CommandParameter(object parameter)
         //{
-        //    this.SetCommandParameter(parameter);
+        //    SetCommandParameter(parameter);
         //    return this;
         //}
 
-        public BindingBuilder<TTarget, TSource> CommandParameter<T>(T parameter)
+        public BindingBuilder<T, VM> CommandParameter<P>(P parameter)
         {
-            this.SetCommandParameter(parameter);
+            SetCommandParameter(parameter);
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> CommandParameter<TParam>(Func<TParam> parameter)
+        public BindingBuilder<T, VM> CommandParameter<TParam>(Func<TParam> parameter)
         {
-            this.SetCommandParameter(parameter);
+            SetCommandParameter(parameter);
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> WithConversion(string converterName)
+        public BindingBuilder<T, VM> WithConversion(string converterName)
         {
-            var converter = this.ConverterByName(converterName);
-            return this.WithConversion(converter);
+            var converter = ConverterByName(converterName);
+            return WithConversion(converter);
         }
 
-        public BindingBuilder<TTarget, TSource> WithConversion(IConverter converter)
+        public BindingBuilder<T, VM> WithConversion(IConverter converter)
         {
-            this.description.Converter = converter;
+            description.Converter = converter;
             return this;
         }
 
-        public BindingBuilder<TTarget, TSource> WithScopeKey(object scopeKey)
+        public BindingBuilder<T, VM> WithScopeKey(object scopeKey)
         {
-            this.SetScopeKey(scopeKey);
+            SetScopeKey(scopeKey);
             return this;
         }
     }
 
-    public class BindingBuilder<TTarget> : BindingBuilderBase where TTarget : class
+    public class BindingBuilder<T> : BindingBuilderBase where T : class
     {
-        //private static readonly ILog log = LogManager.GetLogger(typeof(BindingBuilder<TTarget>));
+        //private static readonly ILog log = LogManager.GetLogger(typeof(BindingBuilder<T>));
 
-        public BindingBuilder(IBindingContext context, TTarget target) : base(context, target)
+        public BindingBuilder(IBindingContext context, T target) : base(context, target)
         {
-            this.description.TargetType = typeof(TTarget);
+            description.TargetType = typeof(T);
         }
 
-        public BindingBuilder<TTarget> For(string targetPropertyName)
+        public BindingBuilder<T> For(string targetPropertyName)
         {
-            this.description.TargetName = targetPropertyName;
-            this.description.UpdateTrigger = null;
+            description.TargetName = targetPropertyName;
+            description.UpdateTrigger = null;
             return this;
         }
 
-        public BindingBuilder<TTarget> For(string targetPropertyName, string updateTrigger)
+        public BindingBuilder<T> For(string targetPropertyName, string updateTrigger)
         {
-            this.description.TargetName = targetPropertyName;
-            this.description.UpdateTrigger = updateTrigger;
+            description.TargetName = targetPropertyName;
+            description.UpdateTrigger = updateTrigger;
             return this;
         }
 
-        public BindingBuilder<TTarget> For<TResult>(Expression<Func<TTarget, TResult>> memberExpression)
+        public BindingBuilder<T> For<R>(Expression<Func<T, R>> memberExpression)
         {
-            string targetName = this.PathParser.ParseMemberName(memberExpression);
-            this.description.TargetName = targetName;
-            this.description.UpdateTrigger = null;
+            string targetName = PathParser.ParseMemberName(memberExpression);
+            description.TargetName = targetName;
+            description.UpdateTrigger = null;
             return this;
         }
 
-        public BindingBuilder<TTarget> For<TResult>(Expression<Func<TTarget, TResult>> memberExpression, string updateTrigger)
+        public BindingBuilder<T> For<R>(Expression<Func<T, R>> memberExpression, string updateTrigger)
         {
-            string targetName = this.PathParser.ParseMemberName(memberExpression);
-            this.description.TargetName = targetName;
-            this.description.UpdateTrigger = updateTrigger;
+            string targetName = PathParser.ParseMemberName(memberExpression);
+            description.TargetName = targetName;
+            description.UpdateTrigger = updateTrigger;
             return this;
         }
 
-        public BindingBuilder<TTarget> For<TResult, TEvent>(Expression<Func<TTarget, TResult>> memberExpression, Expression<Func<TTarget, TEvent>> updateTriggerExpression)
+        public BindingBuilder<T> For<R, TEvent>(Expression<Func<T, R>> memberExpression, Expression<Func<T, TEvent>> updateTriggerExpression)
         {
-            string targetName = this.PathParser.ParseMemberName(memberExpression);
-            string updateTrigger = this.PathParser.ParseMemberName(updateTriggerExpression);
-            this.description.TargetName = targetName;
-            this.description.UpdateTrigger = updateTrigger;
+            string targetName = PathParser.ParseMemberName(memberExpression);
+            string updateTrigger = PathParser.ParseMemberName(updateTriggerExpression);
+            description.TargetName = targetName;
+            description.UpdateTrigger = updateTrigger;
             return this;
         }
 
-        public BindingBuilder<TTarget> For(Expression<Func<TTarget, EventHandler<InteractionEventArgs>>> memberExpression)
+        public BindingBuilder<T> For(Expression<Func<T, EventHandler<InteractionEventArgs>>> memberExpression)
         {
-            string targetName = this.PathParser.ParseMemberName(memberExpression);
-            this.description.TargetName = targetName;
-            this.description.UpdateTrigger = null;
-            this.OneWayToSource();
+            string targetName = PathParser.ParseMemberName(memberExpression);
+            description.TargetName = targetName;
+            description.UpdateTrigger = null;
+            OneWayToSource();
             return this;
         }
 
 #if UNITY_2019_1_OR_NEWER
-        public BindingBuilder<TTarget> For<TResult>(Expression<Func<TTarget, TResult>> memberExpression, Expression<Func<TTarget, Func<EventCallback<ChangeEvent<TResult>>, bool>>> updateTriggerExpression)
+        public BindingBuilder<T> For<R>(Expression<Func<T, R>> memberExpression, Expression<Func<T, Func<EventCallback<ChangeEvent<R>>, bool>>> updateTriggerExpression)
         {
-            string targetName = this.PathParser.ParseMemberName(memberExpression);
-            string updateTrigger = this.PathParser.ParseMemberName(updateTriggerExpression);
-            this.description.TargetName = targetName;
-            this.description.UpdateTrigger = updateTrigger;
+            string targetName = PathParser.ParseMemberName(memberExpression);
+            string updateTrigger = PathParser.ParseMemberName(updateTriggerExpression);
+            description.TargetName = targetName;
+            description.UpdateTrigger = updateTrigger;
             return this;
         }
 
-        public BindingBuilder<TTarget> For<TResult>(Expression<Func<TTarget, Func<EventCallback<ChangeEvent<TResult>>, bool>>> memberExpression)
+        public BindingBuilder<T> For<R>(Expression<Func<T, Func<EventCallback<ChangeEvent<R>>, bool>>> memberExpression)
         {
-            string targetName = this.PathParser.ParseMemberName(memberExpression);
-            this.description.TargetName = targetName;
-            this.description.UpdateTrigger = null;
-            this.OneWayToSource();
+            string targetName = PathParser.ParseMemberName(memberExpression);
+            description.TargetName = targetName;
+            description.UpdateTrigger = null;
+            OneWayToSource();
             return this;
         }
 #endif
 
-        public BindingBuilder<TTarget> To(string path)
+        public BindingBuilder<T> To(string path)
         {
-            this.SetStaticMemberPath(path);
-            this.OneWay();
+            SetStaticMemberPath(path);
+            OneWay();
             return this;
         }
 
-        public BindingBuilder<TTarget> To<TResult>(Expression<Func<TResult>> path)
+        public BindingBuilder<T> To<R>(Expression<Func<R>> path)
         {
-            this.SetStaticMemberPath(this.PathParser.ParseStaticPath(path));
-            this.OneWay();
+            SetStaticMemberPath(PathParser.ParseStaticPath(path));
+            OneWay();
             return this;
         }
 
-        public BindingBuilder<TTarget> To<TParameter>(Expression<Func<Action<TParameter>>> path)
+        public BindingBuilder<T> To<TParameter>(Expression<Func<Action<TParameter>>> path)
         {
-            this.SetStaticMemberPath(this.PathParser.ParseStaticPath(path));
+            SetStaticMemberPath(PathParser.ParseStaticPath(path));
             return this;
         }
 
-        public BindingBuilder<TTarget> To(Expression<Func<Action>> path)
+        public BindingBuilder<T> To(Expression<Func<Action>> path)
         {
-            this.SetStaticMemberPath(this.PathParser.ParseStaticPath(path));
+            SetStaticMemberPath(PathParser.ParseStaticPath(path));
             return this;
         }
 
-        public BindingBuilder<TTarget> ToValue(object value)
+        public BindingBuilder<T> ToValue(object value)
         {
-            this.SetLiteral(value);
+            SetLiteral(value);
             return this;
         }
 
-        public BindingBuilder<TTarget> ToExpression<TResult>(Expression<Func<TResult>> expression)
+        public BindingBuilder<T> ToExpression<R>(Expression<Func<R>> expression)
         {
-            this.SetExpression(expression);
-            this.OneWay();
+            SetExpression(expression);
+            OneWay();
             return this;
         }
 
-        public BindingBuilder<TTarget> TwoWay()
+        public BindingBuilder<T> TwoWay()
         {
-            this.SetMode(BindingMode.TwoWay);
+            SetMode(BindingMode.TwoWay);
             return this;
         }
 
-        public BindingBuilder<TTarget> OneWay()
+        public BindingBuilder<T> OneWay()
         {
-            this.SetMode(BindingMode.OneWay);
+            SetMode(BindingMode.OneWay);
             return this;
         }
 
-        public BindingBuilder<TTarget> OneWayToSource()
+        public BindingBuilder<T> OneWayToSource()
         {
-            this.SetMode(BindingMode.OneWayToSource);
+            SetMode(BindingMode.OneWayToSource);
             return this;
         }
 
-        public BindingBuilder<TTarget> OneTime()
+        public BindingBuilder<T> OneTime()
         {
-            this.SetMode(BindingMode.OneTime);
+            SetMode(BindingMode.OneTime);
             return this;
         }
 
-        //public BindingBuilder<TTarget> CommandParameter(object parameter)
+        //public BindingBuilder<T> CommandParameter(object parameter)
         //{
-        //    this.SetCommandParameter(parameter);
+        //    SetCommandParameter(parameter);
         //    return this;
         //}
 
-        public BindingBuilder<TTarget> CommandParameter<T>(T parameter)
+        public BindingBuilder<T> CommandParameter<P>(P parameter)
         {
-            this.SetCommandParameter(parameter);
+            SetCommandParameter(parameter);
             return this;
         }
 
-        public BindingBuilder<TTarget> CommandParameter<TParam>(Func<TParam> parameter)
+        public BindingBuilder<T> CommandParameter<TParam>(Func<TParam> parameter)
         {
-            this.SetCommandParameter(parameter);
+            SetCommandParameter(parameter);
             return this;
         }
 
-        public BindingBuilder<TTarget> WithConversion(string converterName)
+        public BindingBuilder<T> WithConversion(string converterName)
         {
             var converter = ConverterByName(converterName);
-            return this.WithConversion(converter);
+            return WithConversion(converter);
         }
 
-        public BindingBuilder<TTarget> WithConversion(IConverter converter)
+        public BindingBuilder<T> WithConversion(IConverter converter)
         {
-            this.description.Converter = converter;
+            description.Converter = converter;
             return this;
         }
 
-        public BindingBuilder<TTarget> WithScopeKey(object scopeKey)
+        public BindingBuilder<T> WithScopeKey(object scopeKey)
         {
-            this.SetScopeKey(scopeKey);
+            SetScopeKey(scopeKey);
             return this;
         }
     }
@@ -391,74 +390,74 @@ namespace Loxodon.Framework.Binding.Builder
 
         public BindingBuilder For(string targetName, string updateTrigger = null)
         {
-            this.description.TargetName = targetName;
-            this.description.UpdateTrigger = updateTrigger;
+            description.TargetName = targetName;
+            description.UpdateTrigger = updateTrigger;
             return this;
         }
 
         public BindingBuilder To(string path)
         {
-            this.SetMemberPath(path);
+            SetMemberPath(path);
             return this;
         }
 
         public BindingBuilder ToStatic(string path)
         {
-            this.SetStaticMemberPath(path);
+            SetStaticMemberPath(path);
             return this;
         }
 
         public BindingBuilder ToValue(object value)
         {
-            this.SetLiteral(value);
+            SetLiteral(value);
             return this;
         }
 
         public BindingBuilder TwoWay()
         {
-            this.SetMode(BindingMode.TwoWay);
+            SetMode(BindingMode.TwoWay);
             return this;
         }
 
         public BindingBuilder OneWay()
         {
-            this.SetMode(BindingMode.OneWay);
+            SetMode(BindingMode.OneWay);
             return this;
         }
 
         public BindingBuilder OneWayToSource()
         {
-            this.SetMode(BindingMode.OneWayToSource);
+            SetMode(BindingMode.OneWayToSource);
             return this;
         }
 
         public BindingBuilder OneTime()
         {
-            this.SetMode(BindingMode.OneTime);
+            SetMode(BindingMode.OneTime);
             return this;
         }
 
         public BindingBuilder CommandParameter(object parameter)
         {
-            this.SetCommandParameter(parameter);
+            SetCommandParameter(parameter);
             return this;
         }
 
         public BindingBuilder WithConversion(string converterName)
         {
-            var converter = this.ConverterByName(converterName);
-            return this.WithConversion(converter);
+            var converter = ConverterByName(converterName);
+            return WithConversion(converter);
         }
 
         public BindingBuilder WithConversion(IConverter converter)
         {
-            this.description.Converter = converter;
+            description.Converter = converter;
             return this;
         }
 
         public BindingBuilder WithScopeKey(object scopeKey)
         {
-            this.SetScopeKey(scopeKey);
+            SetScopeKey(scopeKey);
             return this;
         }
     }
